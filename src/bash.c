@@ -3,6 +3,8 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
+#include "ioctl.h"
+
 int main() {
     int fd;
     
