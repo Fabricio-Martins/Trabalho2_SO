@@ -133,13 +133,13 @@ int init_module (void)
     if (digest) compute_digest = LIME_DIGEST_COMPUTE;
 	
 	do{
-		DBG("Esperando valor via ioctl...");
+		printk("[LiME] Esperando valor via ioctl...\n");
 
         // Espera pelo ioctl com timeout infinito (HZ * segundos se precisar de timeout)
         wait_event_interruptible(ioctl_wait_queue, ioctl_value_set != 0);
 
         mutex_lock(&ioctl_mutex);
-        DBG("Valor recebido do ioctl: %d", ioctl_value);
+        printk("[LiME] Valor recebido do ioctl: %d\n", ioctl_value);
         ioctl_value_set = 0;  // Resetar para que possa esperar outro valor no futuro
         mutex_unlock(&ioctl_mutex);
 
@@ -155,7 +155,7 @@ int init_module (void)
 #include <linux/mutex.h>
 #include <linux/sched.h>
 
-#define IOCTL_WAIT_FOR_VALUE _IOW('a', 1, int)
+#define "ioctl.h"
 
 static int ioctl_value = 0;
 static int ioctl_value_set = 0;

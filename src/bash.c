@@ -3,28 +3,33 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
-#define IOCTL_WAIT_FOR_VALUE _IOW('a', 1, int)
-
 int main() {
     int fd;
-    int value = 123;  // Exemplo de valor para enviar ao ioctl
+    
+	LiME_path dadosParaModulo;
 	
 	//system("insmod lime.ko");
 
-    fd = open("/dev/byte_string_device", O_RDWR);
+    fd = open(DEVICE_NAME, O_RDWR);
     if (fd < 0) {
         perror("Failed to open device");
         return -1;
     }
-
-    if (ioctl(fd, IOCTL_WAIT_FOR_VALUE, &value) == -1) {
-        perror("Failed to send ioctl");
-        close(fd);
-        return -1;
-    }
-
-    printf("Valor %d enviado ao módulo kernel\n", value);
 	
+	do{
+		
+		scanf("%s", dadosParaModulo.path);
+		
+		if (ioctl(fd, IOCTL_WAIT_FOR_VALUE, &dadosParaModulo) == -1) {
+			perror("Failed to send ioctl");
+			close(fd);
+			return -1;
+		}
+
+		printf("Valor %s enviado ao módulo kernel\n", dadosParaModulo.path);
+		
+	}while(strcmp(path, "exit()") == 0);
+
 	// Remove the module
     system("rmmod lime");
 
