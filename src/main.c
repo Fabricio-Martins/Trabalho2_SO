@@ -94,6 +94,17 @@ int compress = 0;
 module_param(compress, int, S_IRUGO);
 #endif
 
+#include <linux/wait.h>
+#include <linux/mutex.h>
+#include <linux/sched.h>
+
+#include "ioctl.h"
+
+LiME_path dadosLiME;
+static int ioctl_value_set = 0;
+static wait_queue_head_t ioctl_wait_queue;
+static DEFINE_MUTEX(ioctl_mutex);
+
 int init_module (void)
 {
     if(!path) {
@@ -139,7 +150,7 @@ int init_module (void)
         wait_event_interruptible(ioctl_wait_queue, ioctl_value_set != 0);
 
         mutex_lock(&ioctl_mutex);
-        printk("[LiME] Valor recebido do ioctl: %d\n", ioctl_value);
+        //printk("[LiME] Valor recebido do ioctl: %d\n", ioctl_value);
         ioctl_value_set = 0;  // Resetar para que possa esperar outro valor no futuro
         mutex_unlock(&ioctl_mutex);
 
@@ -151,17 +162,6 @@ int init_module (void)
     return 0;
 }
 
-#include <linux/wait.h>
-#include <linux/mutex.h>
-#include <linux/sched.h>
-
-#define "ioctl.h"
-
-static LiME_path dadosLiME;
-static int ioctl_value_set = 0;
-static wait_queue_head_t ioctl_wait_queue;
-static DEFINE_MUTEX(ioctl_mutex);
-
 static long device_ioctl(struct file *file, unsigned int cmd, unsigned long arg) {
     LiME_path dados;
 
@@ -172,13 +172,13 @@ static long device_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
             }
 
             mutex_lock(&ioctl_mutex);
-            dadosLiME.stauts = dados.status;
+            dadosLiME.status = dados.status;
 			dadosLiME.path = dados.path;
             ioctl_value_set = 1;
             mutex_unlock(&ioctl_mutex);
 
             wake_up_interruptible(&ioctl_wait_queue);  // Acordar o módulo para continuar
-            printk(KERN_INFO "ioctl: valor recebido = %d\n", ioctl_value);
+            //printk(KERN_INFO "ioctl: valor recebido = %d\n", ioctl_value);
             break;
 
         default:

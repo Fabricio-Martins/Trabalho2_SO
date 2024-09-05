@@ -30,7 +30,7 @@ int main() {
 
 		printf("Valor %s enviado ao módulo kernel\n", dadosParaModulo.path);
 		
-	}while(strcmp(path, "exit()") == 0);
+	}while(strcmp(dadosParaModulo.path, "exit()") == 0);
 
 	// Remove the module
     system("rmmod lime");
