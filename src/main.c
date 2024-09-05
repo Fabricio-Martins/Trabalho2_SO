@@ -157,22 +157,23 @@ int init_module (void)
 
 #define "ioctl.h"
 
-static int ioctl_value = 0;
+static LiME_path dadosLiME;
 static int ioctl_value_set = 0;
 static wait_queue_head_t ioctl_wait_queue;
 static DEFINE_MUTEX(ioctl_mutex);
 
 static long device_ioctl(struct file *file, unsigned int cmd, unsigned long arg) {
-    int value;
+    LiME_path dados;
 
     switch (cmd) {
         case IOCTL_WAIT_FOR_VALUE:
-            if (copy_from_user(&value, (int *)arg, sizeof(int))) {
+            if (copy_from_user(&dados, (LiME_path *)arg, sizeof(LiME_path))) {
                 return -EFAULT;
             }
 
             mutex_lock(&ioctl_mutex);
-            ioctl_value = value;
+            dadosLiME.stauts = dados.status;
+			dadosLiME.path = dados.path;
             ioctl_value_set = 1;
             mutex_unlock(&ioctl_mutex);
 
