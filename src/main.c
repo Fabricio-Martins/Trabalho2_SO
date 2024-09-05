@@ -131,13 +131,65 @@ int init_module (void)
 
     method = LIME_METHOD_DISK;
     if (digest) compute_digest = LIME_DIGEST_COMPUTE;
+	
+	do{
+		DBG("Esperando valor via ioctl...");
 
-    do{
-        init();
-    }while(0);
+        // Espera pelo ioctl com timeout infinito (HZ * segundos se precisar de timeout)
+        wait_event_interruptible(ioctl_wait_queue, ioctl_value_set != 0);
+
+        mutex_lock(&ioctl_mutex);
+        DBG("Valor recebido do ioctl: %d", ioctl_value);
+        ioctl_value_set = 0;  // Resetar para que possa esperar outro valor no futuro
+        mutex_unlock(&ioctl_mutex);
+
+        // Aqui, o código pode continuar
+		init();
+	}while(0);
+
 
     return 0;
 }
+
+#include <linux/wait.h>
+#include <linux/mutex.h>
+#include <linux/sched.h>
+
+#define IOCTL_WAIT_FOR_VALUE _IOW('a', 1, int)
+
+static int ioctl_value = 0;
+static int ioctl_value_set = 0;
+static wait_queue_head_t ioctl_wait_queue;
+static DEFINE_MUTEX(ioctl_mutex);
+
+static long device_ioctl(struct file *file, unsigned int cmd, unsigned long arg) {
+    int value;
+
+    switch (cmd) {
+        case IOCTL_WAIT_FOR_VALUE:
+            if (copy_from_user(&value, (int *)arg, sizeof(int))) {
+                return -EFAULT;
+            }
+
+            mutex_lock(&ioctl_mutex);
+            ioctl_value = value;
+            ioctl_value_set = 1;
+            mutex_unlock(&ioctl_mutex);
+
+            wake_up_interruptible(&ioctl_wait_queue);  // Acordar o módulo para continuar
+            printk(KERN_INFO "ioctl: valor recebido = %d\n", ioctl_value);
+            break;
+
+        default:
+            return -EINVAL;
+    }
+
+    return 0;
+}
+
+static struct file_operations fops = {
+    .unlocked_ioctl = device_ioctl,
+};
 
 static int init() {
     struct resource *p;
