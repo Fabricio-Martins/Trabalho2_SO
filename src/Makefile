@@ -1,29 +1,11 @@
-# LiME - Linux Memory Extractor
-# Copyright (c) 2011-2014 Joe Sylve - 504ENSICS Labs
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or (at
-# your option) any later version.
-#
-# This program is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-# General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 
 obj-m := lime.o
-lime-objs := disk.o main.o hash.o deflate.o
-CFLAGS_main.o := -DDEBUG
+lime-objs := tcp.o disk.o main.o hash.o deflate.o
 
 KVER ?= $(shell uname -r)
 
 KDIR ?= /lib/modules/$(KVER)/build
-#KDIR := /lib/modules/$(shell uname -r)/build
 
 PWD := $(shell pwd)
 
@@ -31,13 +13,8 @@ PWD := $(shell pwd)
 
 default:
 	$(MAKE) -C $(KDIR) M="$(PWD)" modules
-	#$(MAKE) -C $(KDIR) M=" $(shell pwm)" modules 
 	strip --strip-unneeded lime.ko
-	#mv lime.ko lime-$(KVER).ko
-	gcc bash.c -o ModuleBash
-
-bash:
-	gcc bash.c -o ModuleBash
+	mv lime.ko lime-$(KVER).ko
 
 debug:
 	KCFLAGS="-DLIME_DEBUG" $(MAKE) CONFIG_DEBUG_SG=y -C $(KDIR) M="$(PWD)" modules
@@ -48,7 +25,7 @@ symbols:
 	$(MAKE) -C $(KDIR) M="$(PWD)" modules
 	mv lime.ko lime-$(KVER).ko
 
-modules:    main.c disk.c hash.c lime.h
+modules:    main.c disk.c tcp.c hash.c lime.h
 	$(MAKE) -C /lib/modules/$(KVER)/build M="$(PWD)" $@
 	strip --strip-unneeded lime.ko
 
@@ -62,3 +39,7 @@ clean:
 distclean: mrproper
 mrproper:    clean
 	rm -f *.ko
+
+#sudo insmod simple_module.ko
+#sudo mknod /dev/lime c <major_number> 0
+#Substitua <major_number> pelo número mostrado ao carregar o módulo (verifique no log com dmesg).

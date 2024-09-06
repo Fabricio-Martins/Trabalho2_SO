@@ -32,9 +32,6 @@
 #include <linux/scatterlist.h>
 #include <linux/printk.h>
 
-//#include <net/sock.h>
-//#include <net/tcp.h>
-
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 6, 0)
 #include <crypto/hash.h>
 #elif LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 11)
@@ -50,18 +47,11 @@
 #define LIME_MODE_PADDED 2
 
 #define LIME_METHOD_UNKNOWN 0
-//#define LIME_METHOD_TCP 1
 #define LIME_METHOD_DISK 2
 
 #define LIME_DIGEST_FAILED -1
 #define LIME_DIGEST_COMPLETE 0
 #define LIME_DIGEST_COMPUTE 1
-
-//#ifdef LIME_DEBUG
-//#define DBG(fmt, args...) do { printk("[LiME] "fmt"\n", ## args); } while (0)
-//#else
-//#define DBG(fmt, args...) do {} while(0)
-//#endif
 
 #define RETRY_IF_INTERRUPTED(f) ({ \
     ssize_t err; \
