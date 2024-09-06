@@ -1,8 +1,11 @@
-//#include <stdio.h>
-//#include <fcntl.h>
-//#include <unistd.h>
-//#include <string.h>
-//#include <sys/ioctl.h>
+#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <string.h>
+
+//#include "lime.h"
 
 #define DEVICE_NAME "/dev/lime"
 #define IOCTL_SEND_CMD _IOW('a', 'a', char*)

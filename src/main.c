@@ -112,7 +112,8 @@ static int __init simple_module_init(void) {
 
     do {
         schedule();  // Allow the kernel to context switch
-    } while (keep_running);
+    //} while (keep_running);
+	} while(0);
 
     return 0;
 }

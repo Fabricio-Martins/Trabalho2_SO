@@ -15,6 +15,10 @@ default:
 	$(MAKE) -C $(KDIR) M="$(PWD)" modules
 	strip --strip-unneeded lime.ko
 	mv lime.ko lime-$(KVER).ko
+	gcc bash.c -o bash
+
+bash:
+	gcc bash.c -o bash
 
 debug:
 	KCFLAGS="-DLIME_DEBUG" $(MAKE) CONFIG_DEBUG_SG=y -C $(KDIR) M="$(PWD)" modules
