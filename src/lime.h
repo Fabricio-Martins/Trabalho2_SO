@@ -1,11 +1,7 @@
 /*
  * LiME - Linux Memory Extractor
  * Copyright (c) 2011-2014 Joe Sylve - 504ENSICS Labs
- *
- *
- * Author:
- * Joe Sylve       - joe.sylve@gmail.com, @jtsylve
- *
+
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -34,6 +30,7 @@
 #include <linux/string.h>
 #include <linux/err.h>
 #include <linux/scatterlist.h>
+#include <linux/printk.h>
 
 //#include <net/sock.h>
 //#include <net/tcp.h>

@@ -1,11 +1,7 @@
 /*
  * LiME - Linux Memory Extractor
  * Copyright (c) 2011-2014 Joe Sylve - 504ENSICS Labs
- *
- *
- * Author:
- * Joe Sylve       - joe.sylve@gmail.com, @jtsylve
- *
+ 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -23,7 +19,6 @@
 
 #include "lime.h"
 
-// This file
 static ssize_t write_lime_header(struct resource *);
 static ssize_t write_padding(size_t);
 static void write_range(struct resource *);
@@ -34,11 +29,6 @@ static ssize_t try_write(void *, ssize_t);
 static int setup(void);
 static void cleanup(void);
 
-// External
-//extern ssize_t write_vaddr_tcp(void *, size_t);
-//extern int setup_tcp(void);
-//extern void cleanup_tcp(void);
-
 extern ssize_t write_vaddr_disk(void *, size_t);
 extern int setup_disk(char *, int);
 extern void cleanup_disk(void);
@@ -46,7 +36,6 @@ extern void cleanup_disk(void);
 extern int ldigest_init(void);
 extern int ldigest_update(void *, size_t);
 extern int ldigest_final(void);
-//extern int ldigest_write_tcp(void);
 extern int ldigest_write_disk(void);
 extern int ldigest_clean(void);
 
@@ -66,7 +55,7 @@ static void * vpage;
 static void *deflate_page_buf;
 #endif
 
-char * path = 0;
+char * path = "/home";
 int dio = 0;
 int port = 0;
 int localhostonly = 0;
@@ -91,7 +80,7 @@ extern struct resource iomem_resource;
 
 #ifdef LIME_SUPPORTS_DEFLATE
 int compress = 0;
-module_param(compress, int, S_IRUGO);
+//module_param(compress, int, S_IRUGO);
 #endif
 
 #include <linux/wait.h>
@@ -104,63 +93,6 @@ LiME_path dadosLiME;
 static int ioctl_value_set = 0;
 static wait_queue_head_t ioctl_wait_queue;
 static DEFINE_MUTEX(ioctl_mutex);
-
-int init_module (void)
-{
-    if(!path) {
-        printk("[LiME] No path parameter specified\n");
-        return -EINVAL;
-    }
-
-    //if(!format) {
-    //    DBG("No format parameter specified");
-    //    return -EINVAL;
-    //}
-
-    printk("[LiME] Parameters\n");
-    printk("[LiME]   PATH: %s\n", path);
-    printk("[LiME]   DIO: %u\n", dio);
-    printk("[LiME]   FORMAT: %s\n", format);
-    printk("[LiME]   LOCALHOSTONLY: %u\n", localhostonly);
-    printk("[LiME]   DIGEST: %s\n", digest);
-
-//#ifdef LIME_SUPPORTS_TIMING
-//    DBG("  TIMEOUT: %lu", timeout);
-//#endif
-
-//#ifdef LIME_SUPPORTS_DEFLATE
-//    DBG("  COMPRESS: %u", compress);
-//#endif
-
-    if (!strcmp(format, "raw")) mode = LIME_MODE_RAW;
-    else if (!strcmp(format, "lime")) mode = LIME_MODE_LIME;
-    else if (!strcmp(format, "padded")) mode = LIME_MODE_PADDED;
-    else {
-        printk("[LiME] Invalid format parameter specified.\n");
-        return -EINVAL;
-    }
-
-    method = LIME_METHOD_DISK;
-    if (digest) compute_digest = LIME_DIGEST_COMPUTE;
-	
-	do{
-		printk("[LiME] Esperando valor via ioctl...\n");
-
-        // Espera pelo ioctl com timeout infinito (HZ * segundos se precisar de timeout)
-        wait_event_interruptible(ioctl_wait_queue, ioctl_value_set != 0);
-
-        mutex_lock(&ioctl_mutex);
-        //printk("[LiME] Valor recebido do ioctl: %d\n", ioctl_value);
-        ioctl_value_set = 0;  // Resetar para que possa esperar outro valor no futuro
-        mutex_unlock(&ioctl_mutex);
-
-        // Aqui, o código pode continuar
-		init();
-	}while(0);
-
-
-    return 0;
-}
 
 static long device_ioctl(struct file *file, unsigned int cmd, unsigned long arg) {
     LiME_path dados;
@@ -192,6 +124,64 @@ static struct file_operations fops = {
     .unlocked_ioctl = device_ioctl,
 };
 
+int init_module (void){
+	//printk("[LiME] Parameters\n");
+    //if(!path) {
+     //   printk("[LiME] No path parameter specified\n");
+     //   return -EINVAL;
+    //}
+
+    //if(!format) {
+    //    DBG("No format parameter specified");
+    //    return -EINVAL;
+    //}
+
+    //printk("[LiME]   PATH: %s\n", path);
+    //printk("[LiME]   DIO: %u\n", dio);
+    //printk("[LiME]   FORMAT: %s\n", format);
+    //printk("[LiME]   LOCALHOSTONLY: %u\n", localhostonly);
+    //printk("[LiME]   DIGEST: %s\n", digest);
+
+	static int major;
+	dev_t dev;
+
+	if ((major = register_chrdev(0, "LiME", &fops)) < 0) {
+		pr_err("failed to register device\n");
+		return major;
+	}
+
+	pr_info("LiME module registered with major number %d\n", major);
+
+    if (!strcmp(format, "raw")) mode = LIME_MODE_RAW;
+    else if (!strcmp(format, "lime")) mode = LIME_MODE_LIME;
+    else if (!strcmp(format, "padded")) mode = LIME_MODE_PADDED;
+    else {
+        //printk("[LiME] Invalid format parameter specified.\n");
+        return -EINVAL;
+    }
+
+    method = LIME_METHOD_DISK;
+    if (digest) compute_digest = LIME_DIGEST_COMPUTE;
+	
+	do{
+		pr_debug("[LiME] Esperando valor via ioctl...\n");
+
+        // Espera pelo ioctl com timeout infinito (HZ * segundos se precisar de timeout)
+        wait_event_interruptible(ioctl_wait_queue, ioctl_value_set != 0);
+
+        mutex_lock(&ioctl_mutex);
+        //printk("[LiME] Valor recebido do ioctl: %d\n", ioctl_value);
+        ioctl_value_set = 0;  // Resetar para que possa esperar outro valor no futuro
+        mutex_unlock(&ioctl_mutex);
+
+        // Aqui, o código pode continuar
+		//init();
+	}while(0);
+
+
+    return 0;
+}
+
 static int init() {
     struct resource *p;
     int err = 0;
@@ -201,10 +191,10 @@ static int init() {
     __PTRDIFF_TYPE__ p_last = -1;
 #endif
 
-    printk("[LiME] Initializing Dump...\n");
+    //printk("[LiME] Initializing Dump...\n");
 
     if ((err = setup())) {
-        printk("[LiME] Setup Error\n");
+        //printk("[LiME] Setup Error\n");
         cleanup();
         return err;
     }
@@ -217,12 +207,12 @@ static int init() {
     vpage = (void *) __get_free_page(GFP_NOIO);
 
 #ifdef LIME_SUPPORTS_DEFLATE
-    printk("[deflate] [compress] se vc ta me vendo isso, ta ativado.\n");
+    //printk("[deflate] [compress] se vc ta me vendo isso, ta ativado.\n");
     if (compress) {
         deflate_page_buf = kmalloc(PAGE_SIZE, GFP_NOIO);
         err = deflate_begin_stream(deflate_page_buf, PAGE_SIZE);
         if (err < 0) {
-            printk("[LiME] ZLIB begin stream failed\n");
+            //printk("[LiME] ZLIB begin stream failed\n");
             return err;
         }
         no_overlap = 1;
@@ -235,10 +225,10 @@ static int init() {
             continue;
 
         if (mode == LIME_MODE_LIME && write_lime_header(p) < 0) {
-            printk("[LiME] Error writing header 0x%lx - 0x%lx\n", (long) p->start, (long) p->end);
+            //printk("[LiME] Error writing header 0x%lx - 0x%lx\n", (long) p->start, (long) p->end);
             break;
         } else if (mode == LIME_MODE_PADDED && write_padding((size_t) ((p->start - 1) - p_last)) < 0) {
-            printk("[LiME] Error writing padding 0x%lx - 0x%lx\n", (long) p_last, (long) p->start - 1);
+            //printk("[LiME] Error writing padding 0x%lx - 0x%lx\n", (long) p_last, (long) p->start - 1);
             break;
         }
 
@@ -249,19 +239,19 @@ static int init() {
 
     write_flush();
 
-    printk("[LiME] Memory Dump Complete...\n");
+    //printk("[LiME] Memory Dump Complete...\n");
 
     cleanup();
 
     if (compute_digest == LIME_DIGEST_COMPUTE) {
-        printk("[LiME] Writing Out Digest.\n");
+        //printk("[LiME] Writing Out Digest.\n");
 
         compute_digest = ldigest_final();
 
         if (compute_digest == LIME_DIGEST_COMPLETE) {
             err = ldigest_write_disk();
 
-            printk("[LiME] Digest Write %s.\n", (err == 0) ? "Complete" : "Failed");
+            //printk("[LiME] Digest Write %s.\n", (err == 0) ? "Complete" : "Failed");
         }
     }
 
@@ -304,7 +294,7 @@ static ssize_t write_padding(size_t s) {
         r = write_vaddr(vpage, i);
 
         if (r != i) {
-            printk("[LiME] Error sending zero page: %zd\n", r);
+            //printk("[LiME] Error sending zero page: %zd\n", r);
             return r;
         }
     }
@@ -327,7 +317,7 @@ static void write_range(struct resource * res) {
 //    ktime_t start,end;
 //#endif
 
-    printk("[LiME] Writing range %llx - %llx.\n", res->start, res->end);
+    //printk("[LiME] Writing range %llx - %llx.\n", res->start, res->end);
 
     for (i = res->start; i <= res->end; i += is) {
 //#ifdef LIME_SUPPORTS_TIMING
@@ -376,16 +366,6 @@ static void write_range(struct resource * res) {
                 break;
             }
         }
-
-//#ifdef LIME_SUPPORTS_TIMING
-//        end = ktime_get_real();
-
-//        if (timeout > 0 && ktime_to_ms(ktime_sub(end, start)) > timeout) {
-//            DBG("Reading is too slow.  Skipping Range...");
-//            write_padding(res->end - i + 1 - is);
-//            break;
-//        }
-//#endif
 
     }
 }

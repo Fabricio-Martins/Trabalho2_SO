@@ -1,10 +1,6 @@
 # LiME - Linux Memory Extractor
 # Copyright (c) 2011-2014 Joe Sylve - 504ENSICS Labs
 #
-#
-# Author:
-# Joe Sylve       - joe.sylve@gmail.com, @jtsylve
-#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or (at
@@ -22,10 +18,12 @@
 
 obj-m := lime.o
 lime-objs := disk.o main.o hash.o deflate.o
+CFLAGS_main.o := -DDEBUG
 
 KVER ?= $(shell uname -r)
 
 KDIR ?= /lib/modules/$(KVER)/build
+#KDIR := /lib/modules/$(shell uname -r)/build
 
 PWD := $(shell pwd)
 
@@ -33,8 +31,9 @@ PWD := $(shell pwd)
 
 default:
 	$(MAKE) -C $(KDIR) M="$(PWD)" modules
+	#$(MAKE) -C $(KDIR) M=" $(shell pwm)" modules 
 	strip --strip-unneeded lime.ko
-	mv lime.ko lime-$(KVER).ko
+	#mv lime.ko lime-$(KVER).ko
 	gcc bash.c -o ModuleBash
 
 bash:

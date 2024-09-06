@@ -89,7 +89,6 @@ ssize_t deflate(const void *in, size_t inlen)
     ret = zlib_deflate(&zstream, flush);
 
     if (ret != Z_OK && !(flush == Z_FINISH && ret == Z_STREAM_END)) {
-        //DBG("Deflate error: %d", ret);
         return -EIO;
     }
 
