@@ -25,9 +25,9 @@
 #include "lime.h"
 
 // External
-/* extern ssize_t write_vaddr_tcp(void *, size_t);
+extern ssize_t write_vaddr_tcp(void *, size_t);
 extern int setup_tcp(void);
-extern void cleanup_tcp(void); */
+extern void cleanup_tcp(void);
 
 extern ssize_t write_vaddr_disk(void *, size_t);
 extern int setup_disk(char *, int);
@@ -51,7 +51,7 @@ struct crypto_tfm *tfm;
 #endif
 
 int ldigest_init(void) {
-   // DBG("Initializing Digest Transformation.");
+    DBG("Initializing Digest Transformation.");
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 6, 0)
     tfm = crypto_alloc_ahash(digest, 0, CRYPTO_ALG_ASYNC);
@@ -81,7 +81,7 @@ int ldigest_init(void) {
 
     crypto_digest_init(tfm);
 #else
-    //printk("[LiME] Digest not supported for this kernel version.\n");
+    DBG("Digest not supported for this kernel version.");
     goto init_fail;
 #endif
 
@@ -90,6 +90,7 @@ int ldigest_init(void) {
     return LIME_DIGEST_COMPUTE;
 
 init_fail:
+    DBG("Digest Initialization Failed.");
     return LIME_DIGEST_FAILED;
 }
 
@@ -102,6 +103,7 @@ int ldigest_update(void *v, size_t is) {
     } else {
         int nbytes = is;
 
+        DBG("Invalid Virtual Address, Manually Scanning Page.");
         while (nbytes > 0) {
             int len = nbytes;
             int off = offset_in_page(v);
@@ -133,13 +135,14 @@ int ldigest_update(void *v, size_t is) {
     return LIME_DIGEST_COMPUTE;
 
 update_fail:
-    //printk("[LiME] Digest Update Failed.\n");
+    DBG("Digest Update Failed.");
     return LIME_DIGEST_FAILED;
 }
 
 int ldigest_final(void) {
     int ret, i;
 
+    DBG("Finalizing the digest.");
     digest_value = kmalloc(digestsize * 2 + 1, GFP_KERNEL);
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 6, 0)
@@ -158,14 +161,15 @@ int ldigest_final(void) {
         sprintf(digest_value + i*2, "%02x", output[i]);
     }
 
+    DBG("Digest is: %s", digest_value);
     return LIME_DIGEST_COMPLETE;
 
 final_fail:
-    printk("[LiME] Failed to finalize the Digest.\n");
+    DBG("Failed to finalize the Digest.");
     return LIME_DIGEST_FAILED;
 }
 
-/* int ldigest_write_tcp(void) {
+int ldigest_write_tcp(void) {
     int ret;
 
     ret = setup_tcp();
@@ -180,7 +184,7 @@ final_fail:
     cleanup_tcp();
 
     return 0;
-} */
+}
 
 int ldigest_write_disk(void) {
     char *p;

@@ -54,11 +54,14 @@ int setup_disk(char *path, int dio) {
 
     if (dio && dio_write_test(path, oflags)) {
         oflags |= O_DIRECT | O_SYNC;
-    } 
+    } else {
+        DBG("Direct IO Disabled");
+    }
 
     f = filp_open(path, oflags, 0444);
 
     if (!f || IS_ERR(f)) {
+        DBG("Error opening file %ld", PTR_ERR(f));
 
         err = (f) ? PTR_ERR(f) : -EIO;
         f = NULL;

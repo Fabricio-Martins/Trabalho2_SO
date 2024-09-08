@@ -1,7 +1,7 @@
 
 
 obj-m := lime.o
-lime-objs := disk.o main.o hash.o deflate.o
+lime-objs := tcp.o disk.o main.o hash.o deflate.o
 
 KVER ?= $(shell uname -r)
 
@@ -29,7 +29,7 @@ symbols:
 	$(MAKE) -C $(KDIR) M="$(PWD)" modules
 	mv lime.ko lime-$(KVER).ko
 
-modules:    main.c disk.c hash.c lime.h
+modules:    main.c disk.c tcp.c hash.c lime.h
 	$(MAKE) -C /lib/modules/$(KVER)/build M="$(PWD)" $@
 	strip --strip-unneeded lime.ko
 
