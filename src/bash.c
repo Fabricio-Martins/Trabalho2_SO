@@ -20,10 +20,9 @@ int main() {
         return -1;
     }
 	
-    printf("Comandos: (start <path>, ping ou Exit()): ");
-    
     // Loop principal para ler comandos do usuário
     while (1) {
+		printf("Comandos: (start <path>, ping ou Exit()): ");
         // Lê o comando inserido pelo usuário
         fgets(command, sizeof(command), stdin);
         command[strcspn(command, "\n")] = '\0';  // Remove o caractere de nova linha ao final do comando

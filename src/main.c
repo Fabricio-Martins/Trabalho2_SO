@@ -11,12 +11,12 @@
 static ssize_t write_lime_header(struct resource *);
 static ssize_t write_padding(size_t);
 static void write_range(struct resource *);
-static int init(void);
 static ssize_t write_vaddr(void *, size_t);
 static ssize_t write_flush(void);
 static ssize_t try_write(void *, ssize_t);
 static int setup(void);
 static void cleanup(void);
+static int limeInit(void);
 
 // External
 extern ssize_t write_vaddr_tcp(void *, size_t);
@@ -55,6 +55,7 @@ int port = 0;
 int localhostonly = 0;
 
 char * digest = 0;
+char *format = "raw";
 int compute_digest = 0;
 
 int no_overlap = 0;
@@ -82,11 +83,11 @@ static char cmd_buffer[256];
 static bool keep_running = true;
 
 // Função que chama o LiME para realizar o dump de memória
-static void mDump(const char *path) {
+static void mDump(void) {
     mode = LIME_MODE_RAW;          // Configura o modo de operação
     method = LIME_METHOD_DISK;     // Define o método de escrita em disco
     if (digest) compute_digest = LIME_DIGEST_COMPUTE; // Calcula o digest, se definido
-	initLime(); //chama o comando de inicio do LiME
+	limeInit(); //chama o comando de inicio do LiME
 }
 
 // Função que valida a entrada dos comandos via ioctl
@@ -102,13 +103,14 @@ static long device_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 
 		// Verifica se o comando é "start <path>"
         if (strncmp(cmd_buffer, "start", 5) == 0) {
-            char *path = cmd_buffer + 6;  // Extrai o caminho após "start "
+            path = cmd_buffer + 6;  // Extrai o caminho após "start "
 			if(!path) {
 				printk(KERN_INFO "No path parameter specified");
 				return -EINVAL;
 			}
 			printk(KERN_INFO "Iniciando despejo de memória no caminho: \" %s \"\n", path);
-            mDump(path);  // Chama a função mDump para realizar o dump
+            mDump();  // Chama a função mDump para realizar o dump
+			printk(KERN_INFO "Despejo de memória terminado\n");
 		} else if (strcmp(cmd_buffer, "ping") == 0) {
 			printk(KERN_INFO "...Pong...\n");	//Responde o ping
         } else if (strcmp(cmd_buffer, "Exit()") == 0) {
@@ -195,7 +197,7 @@ MODULE_DESCRIPTION("Simple Kernel Module with ioctl for command handling");
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  */
 
-static int initLime() {
+static int limeInit() {
     struct resource *p;
     int err = 0;
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,18)
