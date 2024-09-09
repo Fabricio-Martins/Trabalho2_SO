@@ -1,4 +1,4 @@
-# Simple Kernel Module with LiME Integration
+# Módulo de Kernel simples com integração ao LiME
 ##[LiME](https://github.com/504ensicsLabs/LiME.git)
 
 ## Autores
