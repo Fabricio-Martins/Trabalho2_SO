@@ -1,0 +1,17 @@
+Médias Aritméticas das Linhas:
+Linha 0: 4.50
+Linha 1: 5.50
+Linha 2: 6.50
+Linha 3: 7.50
+Linha 4: 8.50
+Linha 5: 9.50
+
+Médias Geométricas das Colunas:
+Coluna 0: 2.99
+Coluna 1: 4.14
+Coluna 2: 5.22
+Coluna 3: 6.27
+Coluna 4: 7.30
+Coluna 5: 8.32
+Coluna 6: 9.34
+Coluna 7: 10.36
