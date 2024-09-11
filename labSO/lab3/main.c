@@ -9,10 +9,26 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
-#include <math.h>
 #include <string.h>
 
 #include "lab3.h"
+
+//operação matemática que representa a multiplicação sucessiva de um número por ele mesmo
+//base^exp
+int potencia(int base, int exp){
+    if(exp < 0)
+    return -1;
+
+    int result = 1;
+    while (exp){
+        if (exp & 1)
+            result *= base;
+        exp >>= 1;
+        base *= base;
+    }
+    return result;
+}
+
 
 // Função para calcular a média aritmética das linhas dentro de uma faixa
 void* calcMediaAritmetica(void* arg) {
@@ -39,7 +55,7 @@ void* calcMediaGeometrica(void* arg) {
         for (int i = 0; i < M; i++) {
             product *= args->matrix[i * args->N + j];
         }
-        args->result[j] = pow(product, 1.0 / M);
+        args->result[j] = potencia(product, 1.0 / M);
     }
     pthread_exit(NULL);
 }
