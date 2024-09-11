@@ -1,12 +1,6 @@
-CC=gcc
-CFLAGS=-I.
-DEPS = lab3.h
 
-%.o: %.c $(DEPS)
-	$(CC) -c -o $@ $< $(CFLAGS)
-
-main: main.o
-	$(CC) -o lab3 main.o
+all:
+	gcc main.c -o lab3
 
 clean: 
 	rm *.o lab3
