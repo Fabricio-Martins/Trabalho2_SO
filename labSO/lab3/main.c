@@ -10,7 +10,9 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <string.h>
+#include <time.h>
 
+#include "matriz.h"
 #include "lab3.h"
 
 //operação matemática que representa a multiplicação sucessiva de um número por ele mesmo
@@ -104,18 +106,47 @@ void escreveArquivo(const char* filename, double* mediaArit, double* mediaGeo, i
     fclose(file);
 }
 
+
 int main(int argc, char *argv[]){
     unsigned int M, N;
 
     int qtdThreads = NTHREADS / 2; // dividido por 2 por cause que metade vai para media aritimetica e a outra para media geometrica
+    if(qtdThreads < 1)qtdThreads = 1;
 
     char input_file[100] = "matriz.txt";
     if(argc >= 2){
         strcpy(input_file, argv[1]);
     }
+    else{ //cria um matriz aleatoria
+        int c = 1000;
+        int r = 2000;
+        FILE *file = fopen("matriz_1000x2000.in", "w");
+        if (file == NULL) {
+            printf("Erro ao abrir o arquivo para escrever.\n");
+            exit(1);
+        }
+        /* gera uma matrix rxc e popula com valores pseudoaleatorios */
+        int **matrix = create_matrix(c, r);
+        srand(time(NULL));   // inicializa o gerador com uma semente.
+        generate_elements(matrix, c, r, 99);
+        fprintf(file, "%dx%d\n", c,r);
+        for(int i=0; i<c; i++){
+            for (int j = 0; j < r; j++) {
+                fprintf(file, "%d ", matrix[i][j]);
+            }
+            fprintf(file, "\n");
+        }
+        fclose(file);
+        free(matrix);
+        return(0);
+    }
+
     printf("Arquivo de entrada: %s\n", input_file);
 
     const char *output_file = "resultado.txt";
+
+    clock_t t; //variável para armazenar tempo
+    t = clock();
 
     // Ler a matriz do arquivo
     unsigned int *matrix = leMatrixArquivo(input_file, &M, &N);
@@ -163,6 +194,9 @@ int main(int argc, char *argv[]){
     for (int j = 0; j < qtdThreads; j++) {
         pthread_join(ListaThreadsGeo[j], NULL);
     }
+
+    t = clock() - t; //tempo final - tempo inicial
+    printf("Demorou %lf milissegundos.\n", ((double)t)/((CLOCKS_PER_SEC/1000)));
 
     // Gravar os resultados no arquivo
     escreveArquivo(output_file, mediaAritmetica, mediaGeometrica, M, N);

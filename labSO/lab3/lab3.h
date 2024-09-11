@@ -16,7 +16,7 @@
 } ThreadArgs;
 
 //Quantidade de THREADS
-#define NTHREADS 4 // Ajustável de acordo com o número de núcleos
+#define NTHREADS 16 // Ajustável de acordo com o número de núcleos
 
 // Função para calcular a média aritmética das linhas dentro de uma faixa
 void* calcMediaAritmetica(void* arg);

@@ -1,6 +1,6 @@
 
 all:
-	gcc main.c -o lab3
+	gcc main.c matriz.c -o lab3
 
 clean: 
 	rm *.o lab3
