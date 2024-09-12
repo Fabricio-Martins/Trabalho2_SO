@@ -1,3 +1,5 @@
+Programa feito por Fabricio e Lucas A. Seemund
+
 Faça um programa que manipule arquivos (ler e escrever) e que, ao receber o signal 2 (SIGINT)
 ou signal 15 (SIGTERM), faça uma finalização limpa (graceful stop) – armazenar as informações
 pendentes e fechar o arquivo.

@@ -1,3 +1,10 @@
+/**
+ * Descrição: atividade 1 a do laboratorio 5
+ *      * Esse é o programa que vai enviar as informações por fifo para o receiver
+ * 
+ * Autor: Fabricio e Lucas A. Seemund
+ * Data: 11/09/2024
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

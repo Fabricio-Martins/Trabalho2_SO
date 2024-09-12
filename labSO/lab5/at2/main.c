@@ -1,3 +1,10 @@
+/**
+ * Descrição: atividade 2 b do laboratorio 5
+ * 
+ * Autor: Fabricio e Lucas A. Seemund
+ * Data: 11/09/2024
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
